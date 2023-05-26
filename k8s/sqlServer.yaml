@@ -2,43 +2,46 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: mssql-deployment
+  name: mssql-deployment
 spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app: mssql
-    strategy:
-        type: Recreate
-    template:
-        metadata:
-            labels:
-                app: mssql
-        spec:
-            terminationGracePeriodSeconds: 10
-            securityContext:
-                fsGroup: 1000
-            containers:
-                - name: mssql
-                  image: mcr.microsoft.com/mssql/rhel/server:2019-latest
-                  env:
-                      - name: MSSQL_PID
-                        value: "Developer"
-                      - name: ACCEPT_EULA
-                        value: "Y"
-                      - name: MSSQL_SA_PASSWORD
-                        valueFrom:
-                            secretKeyRef:
-                                name: mssql-secret
-                                key: SA_PASSWORD
-                  volumeMounts:
-                      - name: mssqldb
-                        mountPath: /var/opt/mssql
-                  resources:
-                      limits:
-                          memory: "128Mi"
-                          cpu: "500m"
-            volumes:
-                - name: mssqldb
-                  persistentVolumeClaim:
-                      claimName: mssql-data
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      terminationGracePeriodSeconds: 10
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: mssql
+          image: mcr.microsoft.com/mssql/rhel/server:2019-latest
+          env:
+            - name: MSSQL_PID
+              value: "Developer"
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mssql-secret
+                  key: SA_PASSWORD
+          volumeMounts:
+            - name: mssqldb
+              mountPath: /var/opt/mssql
+          resources:
+            requests:
+              memory: "2GB"
+              cpu: "500m"
+            limits:
+              memory: "4GB"
+              cpu: "1000m"
+      volumes:
+        - name: mssqldb
+          persistentVolumeClaim:
+            claimName: mssql-data

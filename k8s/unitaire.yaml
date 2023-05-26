@@ -2,48 +2,51 @@
 # kind: Context
 # metadata:
 #     name: "contextTP3"
-    
-# # kubectl config set-context contextTP3 --namespace=unitaire --cluster=docker-desktop --user=docker-desktop 
+
+# # kubectl config set-context contextTP3 --namespace=unitaire --cluster=docker-desktop --user=docker-desktop
 # # kubectl config use-context contextTP3
 # ---
 
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: "unitaire"
-    
-# kubectl config set-context contextTP3 --namespace=unitaire --cluster=docker-desktop --user=docker-desktop 
+  name: "unitaire"
+
+# kubectl config set-context contextTP3 --namespace=unitaire --cluster=docker-desktop --user=docker-desktop
 # kubectl config use-context contextTP3
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: gc.webreact
-    namespace: "unitaire"
-    labels:
+  name: gc.webreact
+  namespace: "unitaire"
+  labels:
+    app: GC.WebReact
+    tier: web
+    env: unitaire
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GC.WebReact
+      tier: web
+      env: unitaire
+  template:
+    metadata:
+      labels:
         app: GC.WebReact
         tier: web
         env: unitaire
-spec:
-    replicas: 1
-    selector:
-        matchLabels:
-            app: GC.WebReact
-            tier: web
-            env: unitaire
-    template:
-        metadata:
-            labels:
-                app: GC.WebReact
-                tier: web
-                env: unitaire
-        spec:
-            containers:
-                - name: webreact
-                  image: dodo1237/tp3itv:alpha
-                  resources:
-                      limits:
-                          memory: "128Mi"
-                          cpu: "500m"
-                  ports:
-                      - containerPort: 80
+    spec:
+      containers:
+        - name: webreact
+          image: dodo1237/tp3itv:alpha
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 80
