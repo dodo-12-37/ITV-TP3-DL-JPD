@@ -1,0 +1,13 @@
+# db-persistent-volume-claim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

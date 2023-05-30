@@ -50,3 +50,6 @@ spec:
               cpu: "1000m"
           ports:
             - containerPort: 80
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              value: "Server=mssql;Database=GC.WebReact;User Id=SA;Password=yourStrong(!)Password;MultipleActiveResultSets=true"

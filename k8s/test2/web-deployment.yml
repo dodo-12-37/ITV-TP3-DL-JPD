@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: vehicle-quotes-web
-          image: localhost:32000/vehicle-quotes-dev:registry
+          image: dodo1237/tp3itv:alpha
           ports:
             - containerPort: 5000
               name: "http"

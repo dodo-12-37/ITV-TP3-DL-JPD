@@ -1,0 +1,18 @@
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: unitaire
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv-tp3/datas"
