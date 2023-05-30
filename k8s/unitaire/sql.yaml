@@ -22,6 +22,7 @@ metadata:
   name: mssql
   namespace: unitaire
 spec:
+  type: NodePort
   selector:
     app: mssql
   ports:
@@ -92,7 +93,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webreact
+  namespace: "unitaire"
 spec:
+  type: NodePort
   selector:
     app: GC.WebReact
   ports:
