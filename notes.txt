@@ -1,0 +1,6 @@
+docker run -d -it --name dodo -p 80:80 dodo1237/tp3itv:alpha
+docker image build -f containers/WebReact/Dockerfile -t "dodo1237/tp3itv:alpha" .
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d --name sqlserver --hostname sqlserver mcr.microsoft.com/mssql/server:2022-latest
+$env:ConnectionStrings__DefaultConnection = "Server=.;Database=GC.WebReact;User Id=SA;Password=yourStrong(!)Password;MultipleActiveResultSets=true"
+
+docker push dodo1237/tp3itv:alpha
