@@ -8,7 +8,7 @@ RUN apt-get update -yq \
     && apt-get install nodejs -yq
 
 # Copy everything
-COPY ./../../src .
+COPY . .
 # Restore as distinct layers
 RUN dotnet restore
 # Build and publish a release
