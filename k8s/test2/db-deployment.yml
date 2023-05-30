@@ -4,10 +4,10 @@ kind: Deployment
 metadata:
   name: vehicle-quotes-db
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: vehicle-quotes-db
-  replicas: 1
   template:
     metadata:
       labels:
