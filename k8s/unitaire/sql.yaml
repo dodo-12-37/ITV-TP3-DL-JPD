@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "unitaire"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: "unitaire"
+type: Opaque
+data:
+  connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
+  MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+
+
+---
+#service mssql
+apiVersion: v1
+kind: Service
+metadata:
+  name: mssql
+  namespace: unitaire
+spec:
+  selector:
+    app: mssql
+  ports:
+    - protocol: TCP
+      port: 1433
+      targetPort: 1433
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
+  namespace: unitaire
+spec:
+  serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
+  replicas: 1 # only one pod, with one SQL Server instance deployed.
+  selector:
+    matchLabels:
+      app: mssql  # this has to be the same as .spec.template.metadata.labels
+  template:
+    metadata:
+      labels:
+        app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+      - name: mssql # container name within the pod.
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "3Gi"
+            cpu: "1000m"
+        ports:
+        - containerPort: 1433
+          name: tcpsql
+        env:
+        - name: ACCEPT_EULA
+          value: "Y"
+        - name: MSSQL_ENABLE_HADR
+          value: "1"
+        - name: MSSQL_AGENT_ENABLED
+          value: "1"
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: MSSQL_SA_PASSWORD
+        volumeMounts:
+        - name: mssql
+          mountPath: "/var/opt/mssql/data"
+  volumeClaimTemplates:
+    - metadata:
+        name: mssql
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+
+---
+
+#service for webreact
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+spec:
+  selector:
+    app: GC.WebReact
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gc.webreact
+  namespace: "unitaire"
+  labels:
+    app: GC.WebReact
+    tier: web
+    env: unitaire
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GC.WebReact
+      tier: web
+      env: unitaire
+  template:
+    metadata:
+      labels:
+        app: GC.WebReact
+        tier: web
+        env: unitaire
+    spec:
+      containers:
+        - name: webreact
+          image: dodo1237/tp3itv:alpha
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: connection_string
