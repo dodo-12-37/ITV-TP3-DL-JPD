@@ -15,42 +15,6 @@ data:
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
 
 ---
-# db-persistent-volume.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mssqldb
-  labels:
-    type: local
-spec:
-  claimRef:
-    namespace: unitaire
-    name: mssql-data-claim
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/run/desktop/mnt/host/c/itv-tp3/datas"
-
----
-# db-persistent-volume-claim.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  namespace: unitaire
-  name: mssql-data-claim
-spec:
-  volumeName: mssqldb
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-
----
 #service mssql
 apiVersion: v1
 kind: Service
@@ -111,17 +75,22 @@ spec:
                   name: secrets
                   key: MSSQL_SA_PASSWORD
           volumeMounts:
-            - name: mssqldb-volume
+            - name: mssql
               mountPath: "/var/opt/mssql/data"
-      volumes:
-        - name: mssqldb-volume
-          persistentVolumeClaim:
-            claimName: mssql-data-claim
+  volumeClaimTemplates:
+    - metadata:
+        name: mssql
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
 
 ---
 #service for webreact
 apiVersion: v1
-kind: Service
+kind: Service 
 # type of service
 metadata:
   name: webreact
@@ -136,6 +105,7 @@ spec:
       port: 80 # port exposed internally by the service
       targetPort: 80 # port exposed by the container
       nodePort: 30000 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
+  
 
 ---
 apiVersion: apps/v1
