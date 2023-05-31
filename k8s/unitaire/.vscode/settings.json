@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "kubernetes://schema/v1%40persistentvolumeclaim": "file:///c%3A/itv/ITV-TP3-DL-JPD/k8s/unitaire/config.yaml"
+    }
+}

@@ -1,10 +1,82 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "NAMESPACE"
+
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: "NAMESPACE"
+type: Opaque
+data:
+  connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
+  MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+
+---
+# Service for webreact
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+  namespace: "NAMESPACE"
+spec:
+  type: NodePort # type of service
+  selector:
+    app: GC.WebReact
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: NODEPORT # port accessible from outside the cluster
+
+---
+# PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-NAMESPACE
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: NAMESPACE
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/NAMESPACE"
+
+---
+# PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: NAMESPACE
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb-NAMESPACE
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
 ---
 #service mssql
 apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  # namespace: unitaire
+  namespace: NAMESPACE
 spec:
   type: NodePort
   selector:
@@ -19,7 +91,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
-  # namespace: unitaire
+  namespace: NAMESPACE
 spec:
   serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
   replicas: 1 # only one pod, with one SQL Server instance deployed.
@@ -64,14 +136,12 @@ spec:
           persistentVolumeClaim:
             claimName: mssql-data-claim
 
-
-
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc.webreact
-  # namespace: "unitaire"
+  namespace: "NAMESPACE"
   labels:
     app: GC.WebReact
     tier: web
