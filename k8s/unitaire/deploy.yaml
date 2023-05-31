@@ -6,7 +6,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  namespace: unitaire
+  # namespace: unitaire
 spec:
   type: NodePort
   selector:
@@ -21,7 +21,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
-  namespace: unitaire
+  # namespace: unitaire
 spec:
   serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
   replicas: 1 # only one pod, with one SQL Server instance deployed.
@@ -73,7 +73,7 @@ kind: Service
 # type of service
 metadata:
   name: webreact
-  namespace: "unitaire"
+  # namespace: "unitaire"
 spec:
   type: NodePort # type of service
   selector:
@@ -90,7 +90,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc.webreact
-  namespace: "unitaire"
+  # namespace: "unitaire"
   labels:
     app: GC.WebReact
     tier: web
