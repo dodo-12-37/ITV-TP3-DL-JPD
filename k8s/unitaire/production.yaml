@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: "unitaire"
+  name: "production"
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: secrets
-  namespace: "unitaire"
+  namespace: "production"
 type: Opaque
 data:
   connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
@@ -24,7 +24,7 @@ metadata:
     type: local
 spec:
   claimRef:
-    namespace: unitaire
+    namespace: c
     name: mssql-data-claim
   storageClassName: manual
   capacity:
@@ -32,14 +32,14 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/run/desktop/mnt/host/c/itv-tp3/datas"
+    path: "/run/desktop/mnt/host/c/itv-tp3/production/datas"
 
 ---
 # db-persistent-volume-claim.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  namespace: unitaire
+  namespace: production
   name: mssql-data-claim
 spec:
   volumeName: mssqldb
@@ -56,7 +56,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  namespace: unitaire
+  namespace: production
 spec:
   type: NodePort
   selector:
@@ -71,7 +71,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
-  namespace: unitaire
+  namespace: production
 spec:
   serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
   replicas: 1 # only one pod, with one SQL Server instance deployed.
@@ -125,7 +125,7 @@ kind: Service
 # type of service
 metadata:
   name: webreact
-  namespace: "unitaire"
+  namespace: "production"
 spec:
   type: NodePort # type of service
   selector:
@@ -142,24 +142,24 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc.webreact
-  namespace: "unitaire"
+  namespace: "production"
   labels:
     app: GC.WebReact
     tier: web
-    env: unitaire
+    env: production
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: GC.WebReact
       tier: web
-      env: unitaire
+      env: production
   template:
     metadata:
       labels:
         app: GC.WebReact
         tier: web
-        env: unitaire
+        env: production
     spec:
       containers:
         - name: webreact
