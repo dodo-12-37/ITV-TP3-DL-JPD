@@ -68,7 +68,7 @@ spec:
 
 ---
 apiVersion: apps/v1
-kind: StatefulSet 
+kind: StatefulSet
 metadata:
   name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
   namespace: unitaire
@@ -111,22 +111,17 @@ spec:
                   name: secrets
                   key: MSSQL_SA_PASSWORD
           volumeMounts:
-            - name: mssqldb
+            - name: mssqldb-volume
               mountPath: "/var/opt/mssql/data"
-  volumeClaimTemplates:
-    - metadata:
-        name: mssql-data-claim
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 8Gi
+      volumes:
+        - name: mssqldb-volume
+          persistentVolumeClaim:
+            claimName: mssql-data-claim
 
 ---
 #service for webreact
 apiVersion: v1
-kind: Service 
+kind: Service
 # type of service
 metadata:
   name: webreact
@@ -141,7 +136,6 @@ spec:
       port: 80 # port exposed internally by the service
       targetPort: 80 # port exposed by the container
       nodePort: 30000 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
-  
 
 ---
 apiVersion: apps/v1
