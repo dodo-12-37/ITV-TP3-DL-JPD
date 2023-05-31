@@ -15,6 +15,15 @@ data:
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
 
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+  namespace: "unitaire"
+data:
+  mon_namespace: "unitaire"
+
+---
 # db-persistent-volume.yaml
 apiVersion: v1
 kind: PersistentVolume
@@ -57,6 +66,13 @@ kind: Service
 metadata:
   name: mssql
   namespace: unitaire
+  # - name: name
+  #   value: mssql
+  # - name: namespace
+  #   valueFrom:
+  #     configMapKeyRef:
+  #       name: config-map
+  #       key: mon_namespace
 spec:
   type: NodePort
   selector:
@@ -84,6 +100,8 @@ spec:
         app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
     spec:
       securityContext:
+        # runAsUser: 1000
+        # runAsGroup: 3000
         fsGroup: 10001
       containers:
         - name: mssql # container name within the pod.
