@@ -19,20 +19,20 @@ data:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mssqldb
+  name: mssqldb-production
   labels:
     type: local
 spec:
   claimRef:
-    namespace: c
+    namespace: production
     name: mssql-data-claim
   storageClassName: manual
   capacity:
-    storage: 5Gi
+    storage: 6Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/run/desktop/mnt/host/c/itv-tp3/production/datas"
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
 
 ---
 # db-persistent-volume-claim.yaml
@@ -42,7 +42,7 @@ metadata:
   namespace: production
   name: mssql-data-claim
 spec:
-  volumeName: mssqldb
+  volumeName: mssqldb-production
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
@@ -83,8 +83,6 @@ spec:
       labels:
         app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
     spec:
-      securityContext:
-        fsGroup: 10001
       containers:
         - name: mssql # container name within the pod.
           image: mcr.microsoft.com/mssql/server:2022-latest
@@ -135,7 +133,7 @@ spec:
       protocol: TCP
       port: 80 # port exposed internally by the service
       targetPort: 80 # port exposed by the container
-      nodePort: 30000 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
+      nodePort: 30002 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
 
 ---
 apiVersion: apps/v1

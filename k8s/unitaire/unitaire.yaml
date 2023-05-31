@@ -28,7 +28,7 @@ spec:
     name: mssql-data-claim
   storageClassName: manual
   capacity:
-    storage: 5Gi
+    storage: 6Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
@@ -42,7 +42,7 @@ metadata:
   namespace: unitaire
   name: mssql-data-claim
 spec:
-  volumeName: mssqldb-unitiare
+  volumeName: mssqldb-unitaire
   storageClassName: manual
   accessModes:
     - ReadWriteOnce
