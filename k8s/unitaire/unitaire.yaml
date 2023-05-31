@@ -75,6 +75,47 @@ spec:
     path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
 
 ---
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-unitaire
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: unitaire
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
+
+---
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-unitaire
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: unitaire
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
+
+
+---
 # db-persistent-volume-claim.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
