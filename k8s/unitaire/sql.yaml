@@ -90,18 +90,22 @@ spec:
 ---
 #service for webreact
 apiVersion: v1
-kind: Service
+kind: Service 
+# type of service
 metadata:
   name: webreact
   namespace: "unitaire"
 spec:
-  type: NodePort
+  type: NodePort # type of service
   selector:
     app: GC.WebReact
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: 30000 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
+  
 
 ---
 apiVersion: apps/v1
