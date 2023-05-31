@@ -1,3 +1,4 @@
+# Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -17,8 +18,7 @@ metadata:
 
 
 ---
-
-
+# Secret unitaire
 apiVersion: v1
 kind: Secret
 metadata:
@@ -28,8 +28,9 @@ type: Opaque
 data:
   connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
----
 
+---
+# Secret acceptation
 apiVersion: v1
 kind: Secret
 metadata:
@@ -39,8 +40,9 @@ type: Opaque
 data:
   connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
----
 
+---
+# Secret production
 apiVersion: v1
 kind: Secret
 metadata:
@@ -52,6 +54,7 @@ data:
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
 
 ---
+# Configmap
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -62,7 +65,61 @@ data:
   nodePort: "30000"
 
 ---
-# db-persistent-volume.yaml
+# service for webreact - unitaire
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+  namespace: "unitaire"
+spec:
+  type: NodePort # type of service
+  selector:
+    app: GC.WebReact
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: 30000 # port accessible from outside the cluster
+
+---
+# service for webreact - production
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+  namespace: "production"
+spec:
+  type: NodePort # type of service
+  selector:
+    app: GC.WebReact
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: 30002 # port accessible from outside the cluster
+
+---
+# service for webreact - acceptation
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+  namespace: "acceptation"
+spec:
+  type: NodePort # type of service
+  selector:
+    app: GC.WebReact
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: 30001 # port accessible from outside the cluster
+
+---
+# PV - unitaire
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -82,16 +139,16 @@ spec:
     path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
 
 ---
-# db-persistent-volume.yaml
+# PV - production
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mssqldb-unitaire
+  name: mssqldb-production
   labels:
     type: local
 spec:
   claimRef:
-    namespace: unitaire
+    namespace: production
     name: mssql-data-claim
   storageClassName: manual
   capacity:
@@ -99,19 +156,19 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
 
 ---
-# db-persistent-volume.yaml
+# PV - Acceptation
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mssqldb-unitaire
+  name: mssqldb-acceptation
   labels:
     type: local
 spec:
   claimRef:
-    namespace: unitaire
+    namespace: acceptation
     name: mssql-data-claim
   storageClassName: manual
   capacity:
@@ -119,11 +176,11 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/acceptation"
 
 
 ---
-# db-persistent-volume-claim.yaml
+# PVC - unitaire
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -138,3 +195,34 @@ spec:
     requests:
       storage: 5Gi
 
+---
+# PVC - production
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: production
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb-production
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# PVC - acceptation
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: acceptation
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb-acceptation
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
