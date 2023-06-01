@@ -35,7 +35,51 @@ spec:
       nodePort: 4441919 # port accessible from outside the cluster
 
 ---
-# PV
+# Deployment for webreact
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gc.webreact
+  namespace: "NAMESPACE"
+  labels:
+    app: GC.WebReact
+    tier: web
+    env: NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GC.WebReact
+      tier: web
+      env: NAMESPACE
+  template:
+    metadata:
+      labels:
+        app: GC.WebReact
+        tier: web
+        env: NAMESPACE
+    spec:
+      containers:
+        - name: webreact
+          image: dodo1237/tp3itv:alpha
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: connection_string
+                  
+---
+# PersistentVolume
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -55,7 +99,7 @@ spec:
     path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/NAMESPACE"
 
 ---
-# PVC
+# PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -88,6 +132,7 @@ spec:
 
 # MSSQL SERVER
 ---
+# StatefulSet for mssql
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

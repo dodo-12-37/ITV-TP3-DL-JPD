@@ -5,4 +5,11 @@ $env:ConnectionStrings__DefaultConnection = "Server=.;Database=GC.WebReact;User 
 
 docker push dodo1237/tp3itv:alpha
 
+
+
+kubectl get pods --all-namespaces -o wide -l tier=web,app=GC.WebReact
+kubectl get statefulset --all-namespaces -o wide -l tier=database,app=GC.WebReact
+
+
+
 kubectl scale deployments gc.webreact --replicas=3
