@@ -2,7 +2,7 @@ $Namespace_aModifier = "NAMESPACE"
 $NodePort_aModifier = 4441919
 
 $Namespace_list = "unitaire", "acceptation", "production"   #[string[]]
-$NodePort_list = 30000, 30001, 30002    #[int[]] 
+[int[]] $NodePort_list = 30000, 30001, 30002    #[int[]] 
 $volumePath = "C:\itv\ITV-TP3-DL-JPD\persistence"
 
 
