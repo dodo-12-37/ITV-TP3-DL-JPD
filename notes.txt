@@ -12,4 +12,4 @@ kubectl get statefulset --all-namespaces -o wide -l tier=database,app=GC.WebReac
 
 
 
-kubectl scale deployments gc.webreact --replicas=3
+kubectl scale deployments gc.webreact --replicas=3 -n unitaire
