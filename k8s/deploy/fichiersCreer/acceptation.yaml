@@ -1,18 +1,75 @@
+# Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: "unitaire"
+  name: "acceptation"
 
 ---
+# Secret
 apiVersion: v1
 kind: Secret
 metadata:
   name: secrets
-  namespace: "unitaire"
+  namespace: "acceptation"
 type: Opaque
 data:
   connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
   MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+
+---
+# Service for webreact
+apiVersion: v1
+kind: Service
+metadata:
+  name: webreact
+  namespace: "acceptation"
+spec:
+  type: NodePort # type of service
+  selector:
+    app: GC.WebReact
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80 # port exposed internally by the service
+      targetPort: 80 # port exposed by the container
+      nodePort: 30001 # port accessible from outside the cluster
+
+---
+# PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-acceptation
+  # namespace: "acceptation"
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: acceptation
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/acceptation"
+
+---
+# PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: acceptation
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb-acceptation
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
 
 ---
 #service mssql
@@ -20,7 +77,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mssql
-  namespace: unitaire
+  namespace: acceptation
 spec:
   type: NodePort
   selector:
@@ -35,20 +92,28 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mssql # name of the StatefulSet workload, the SQL Server instance name is derived from this. We suggest to keep this name same as the .spec.template.metadata.labels, .spec.selector.matchLabels and .spec.serviceName to avoid confusion.
-  namespace: unitaire
+  namespace: acceptation
+  labels:
+    app: GC.WebReact
+    tier: database
+    env: acceptation
 spec:
   serviceName: "mssql" # serviceName is the name of the service that governs this StatefulSet. This service must exist before the StatefulSet, and is responsible for the network identity of the set.
   replicas: 1 # only one pod, with one SQL Server instance deployed.
   selector:
     matchLabels:
       app: mssql # this has to be the same as .spec.template.metadata.labels
+      # app: GC.WebReact 
+      # tier: database
+      # env: acceptation
   template:
     metadata:
       labels:
         app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
+        # app: GC.WebReact
+        # tier: database
+        # env: acceptation
     spec:
-      securityContext:
-        fsGroup: 10001
       containers:
         - name: mssql # container name within the pod.
           image: mcr.microsoft.com/mssql/server:2022-latest
@@ -75,61 +140,36 @@ spec:
                   name: secrets
                   key: MSSQL_SA_PASSWORD
           volumeMounts:
-            - name: mssql
+            - name: mssqldb-volume
               mountPath: "/var/opt/mssql/data"
-  volumeClaimTemplates:
-    - metadata:
-        name: mssql
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 8Gi
-
----
-#service for webreact
-apiVersion: v1
-kind: Service 
-# type of service
-metadata:
-  name: webreact
-  namespace: "unitaire"
-spec:
-  type: NodePort # type of service
-  selector:
-    app: GC.WebReact
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80 # port exposed internally by the service
-      targetPort: 80 # port exposed by the container
-      nodePort: 30000 # port accessible from outside the cluster  #Taper http://127.0.0.1:30000/ dans son navigateur
-  
+      volumes:
+        - name: mssqldb-volume
+          persistentVolumeClaim:
+            claimName: mssql-data-claim
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gc.webreact
-  namespace: "unitaire"
+  namespace: "acceptation"
   labels:
     app: GC.WebReact
     tier: web
-    env: unitaire
+    env: acceptation
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: GC.WebReact
       tier: web
-      env: unitaire
+      env: acceptation
   template:
     metadata:
       labels:
         app: GC.WebReact
         tier: web
-        env: unitaire
+        env: acceptation
     spec:
       containers:
         - name: webreact
