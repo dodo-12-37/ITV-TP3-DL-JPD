@@ -4,3 +4,5 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -p 14
 $env:ConnectionStrings__DefaultConnection = "Server=.;Database=GC.WebReact;User Id=SA;Password=yourStrong(!)Password;MultipleActiveResultSets=true"
 
 docker push dodo1237/tp3itv:alpha
+
+kubectl scale deployments gc.webreact --replicas=3
