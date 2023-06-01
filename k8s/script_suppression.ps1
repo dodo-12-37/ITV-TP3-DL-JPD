@@ -18,10 +18,10 @@ $NodePort_aModifier = 4441919
 $i = 0
 foreach ($Namespace in $Namespace_list) {
     write-host ""
-    write-host "--- Démarrage des déploiements : $Namespace ---"
+    write-host "--- Suppression des déploiements : $Namespace ---"
     $fileData = (Get-Content .\deploy\config.yaml) -creplace $Namespace_aModifier, $Namespace -creplace $NodePort_aModifier, $NodePort_list[$i]
-    $fileData | Set-Content .\deploy\fichiersCreer\$Namespace.yaml
-    $fileData | kubectl apply -f - 
+    # $fileData | Set-Content .\deploy\fichiersCreer\$Namespace.yaml
+    $fileData | kubectl delete -f - 
     $i++
 }
 
