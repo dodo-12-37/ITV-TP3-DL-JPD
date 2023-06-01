@@ -24,7 +24,7 @@ foreach ($Namespace in $Namespace_list) {
     }
 
     $fileData = (Get-Content .\deploy\config.yaml) -creplace $Namespace_aModifier, $Namespace -creplace $NodePort_aModifier, $NodePort_list[$i]
-    $fileData | Set-Content .\deploy\fichiersCreer\$Namespace.yaml    # Uniquement pour visualiser les fichiers résultants
+    # $fileData | Set-Content .\deploy\fichiersCreer\$Namespace.yaml    # Uniquement pour visualiser les fichiers résultants
     $fileData | kubectl apply -f - 
     $i++
 }

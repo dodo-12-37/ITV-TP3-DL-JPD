@@ -36,50 +36,6 @@ spec:
       nodePort: 30002 # port accessible from outside the cluster
 
 ---
-# Deployment for webreact
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gc.webreact
-  namespace: "production"
-  labels:
-    app: GC.WebReact
-    tier: web
-    env: production
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: GC.WebReact
-      tier: web
-      env: production
-  template:
-    metadata:
-      labels:
-        app: GC.WebReact
-        tier: web
-        env: production
-    spec:
-      containers:
-        - name: webreact
-          image: dodo1237/tp3itv:alpha
-          resources:
-            requests:
-              memory: "2Gi"
-              cpu: "500m"
-            limits:
-              memory: "4Gi"
-              cpu: "1000m"
-          ports:
-            - containerPort: 80
-          env:
-            - name: ConnectionStrings__DefaultConnection
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: connection_string
-
----
 # PersistentVolume
 apiVersion: v1
 kind: PersistentVolume
@@ -126,14 +82,13 @@ spec:
   type: NodePort
   selector:
     app: mssql
-    # tier: database
   ports:
     - protocol: TCP
       port: 1433
       targetPort: 1433
 
-# MSSQL SERVER
 ---
+# MSSQL SERVER
 # StatefulSet for mssql
 apiVersion: apps/v1
 kind: StatefulSet
@@ -188,8 +143,9 @@ spec:
           persistentVolumeClaim:
             claimName: mssql-data-claim
 
-# Web Server
 ---
+# Web Server
+# Deployment for webreact
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -231,3 +187,5 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: connection_string
+
+
