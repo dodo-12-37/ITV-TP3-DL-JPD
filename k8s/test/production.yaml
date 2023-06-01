@@ -1,0 +1,140 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "production"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "acceptation"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "production"
+
+
+---
+
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: "production"
+type: Opaque
+data:
+  connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
+  MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: "acceptation"
+type: Opaque
+data:
+  connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
+  MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secrets
+  namespace: "production"
+type: Opaque
+data:
+  connection_string: U2VydmVyPW1zc3FsO0RhdGFiYXNlPUdDLldlYlJlYWN0O1VzZXIgSWQ9U0E7UGFzc3dvcmQ9eW91clN0cm9uZyghKVBhc3N3b3JkO011bHRpcGxlQWN0aXZlUmVzdWx0U2V0cz10cnVl
+  MSSQL_SA_PASSWORD: eW91clN0cm9uZyghKVBhc3N3b3Jk
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-map
+  namespace: "production"
+data:
+  PersistentVolume_mssqldb: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
+  nodePort: "30000"
+
+---
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-production
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: production
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
+
+---
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-production
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: production
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
+
+---
+# db-persistent-volume.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mssqldb-production
+  labels:
+    type: local
+spec:
+  claimRef:
+    namespace: production
+    name: mssql-data-claim
+  storageClassName: manual
+  capacity:
+    storage: 6Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/production"
+
+
+---
+# db-persistent-volume-claim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: production
+  name: mssql-data-claim
+spec:
+  volumeName: mssqldb-production
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
