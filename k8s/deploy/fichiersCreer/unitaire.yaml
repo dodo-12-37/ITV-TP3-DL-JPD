@@ -27,6 +27,7 @@ spec:
   type: NodePort # type of service
   selector:
     app: GC.WebReact
+    # tier: web
   ports:
     - name: http
       protocol: TCP
@@ -35,12 +36,11 @@ spec:
       nodePort: 30000 # port accessible from outside the cluster
 
 ---
-# PV
+# PersistentVolume
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mssqldb-unitaire
-  # namespace: "unitaire"
   labels:
     type: local
 spec:
@@ -56,7 +56,7 @@ spec:
     path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/unitaire"
 
 ---
-# PVC
+# PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -72,7 +72,7 @@ spec:
       storage: 5Gi
 
 ---
-#service mssql
+# Service mssql
 apiVersion: v1
 kind: Service
 metadata:
@@ -88,6 +88,8 @@ spec:
       targetPort: 1433
 
 ---
+# MSSQL SERVER
+# StatefulSet for mssql
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -103,16 +105,10 @@ spec:
   selector:
     matchLabels:
       app: mssql # this has to be the same as .spec.template.metadata.labels
-      # app: GC.WebReact 
-      # tier: database
-      # env: unitaire
   template:
     metadata:
       labels:
-        app: mssql # this has to be the same as .spec.selector.matchLabels, as documented [here](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/):
-        # app: GC.WebReact
-        # tier: database
-        # env: unitaire
+        app: mssql # this has to be the same as .spec.selector.matchLabels, as documented
     spec:
       containers:
         - name: mssql # container name within the pod.
@@ -148,6 +144,8 @@ spec:
             claimName: mssql-data-claim
 
 ---
+# Web Server
+# Deployment for webreact
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -189,3 +187,5 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: connection_string
+
+
