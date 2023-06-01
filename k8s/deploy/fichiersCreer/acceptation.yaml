@@ -27,6 +27,7 @@ spec:
   type: NodePort # type of service
   selector:
     app: GC.WebReact
+    tier: web
   ports:
     - name: http
       protocol: TCP
@@ -35,7 +36,51 @@ spec:
       nodePort: 30001 # port accessible from outside the cluster
 
 ---
-# PV
+# Deployment for webreact
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gc.webreact
+  namespace: "acceptation"
+  labels:
+    app: GC.WebReact
+    tier: web
+    env: acceptation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: GC.WebReact
+      tier: web
+      env: acceptation
+  template:
+    metadata:
+      labels:
+        app: GC.WebReact
+        tier: web
+        env: acceptation
+    spec:
+      containers:
+        - name: webreact
+          image: dodo1237/tp3itv:alpha
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          ports:
+            - containerPort: 80
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: connection_string
+
+---
+# PersistentVolume
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -56,7 +101,7 @@ spec:
     path: "/run/desktop/mnt/host/c/itv/ITV-TP3-DL-JPD/persistence/acceptation"
 
 ---
-# PVC
+# PersistentVolumeClaim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -72,7 +117,7 @@ spec:
       storage: 5Gi
 
 ---
-#service mssql
+# Service for mssql
 apiVersion: v1
 kind: Service
 metadata:
@@ -82,12 +127,14 @@ spec:
   type: NodePort
   selector:
     app: mssql
+    tier: database
   ports:
     - protocol: TCP
       port: 1433
       targetPort: 1433
 
 ---
+# StatefulSet for mssql
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -147,45 +194,4 @@ spec:
           persistentVolumeClaim:
             claimName: mssql-data-claim
 
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gc.webreact
-  namespace: "acceptation"
-  labels:
-    app: GC.WebReact
-    tier: web
-    env: acceptation
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: GC.WebReact
-      tier: web
-      env: acceptation
-  template:
-    metadata:
-      labels:
-        app: GC.WebReact
-        tier: web
-        env: acceptation
-    spec:
-      containers:
-        - name: webreact
-          image: dodo1237/tp3itv:alpha
-          resources:
-            requests:
-              memory: "2Gi"
-              cpu: "500m"
-            limits:
-              memory: "4Gi"
-              cpu: "1000m"
-          ports:
-            - containerPort: 80
-          env:
-            - name: ConnectionStrings__DefaultConnection
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: connection_string
+
