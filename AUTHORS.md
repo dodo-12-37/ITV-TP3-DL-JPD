@@ -1,13 +1,10 @@
-# TP01 - Intégration continue
+# TP03 - Déploiement d'une application web dans Kubernetes
 
 ## Auteurs du TP
 
 - Dominique Lebrun (2291724)
 - Jean-Philippe Delisle (0434571)
 
-## Information projet
-
-- Azure DevOps : 
 
 ## Lien de la vidéo de présentation
 
